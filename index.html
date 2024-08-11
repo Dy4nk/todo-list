@@ -117,6 +117,7 @@
             const todoList = document.getElementById('todo-list');
 
             function formatDate(date) {
+                if (!date) return "Per determinar";
                 const d = new Date(date);
                 let day = '' + d.getDate();
                 let month = '' + (d.getMonth() + 1);
@@ -179,23 +180,15 @@
 
             todoForm.addEventListener('submit', (e) => {
                 e.preventDefault();
+                const taskValue = todoInput.value;
+                const dateValue = todoDate.value || null;
                 db.collection('todos').add({
-                    task: todoInput.value,
-                    date: todoDate.value,
+                    task: taskValue,
+                    date: dateValue,
                     completed: false
                 });
                 todoInput.value = '';
                 todoDate.value = '';
-            });
-
-            todoDate.addEventListener('change', (e) => {
-                const input = e.target;
-                const dateValue = new Date(input.value);
-                const formattedDate = formatDate(input.value);
-                const year = dateValue.getFullYear();
-                const month = (dateValue.getMonth() + 1).toString().padStart(2, '0');
-                const day = dateValue.getDate().toString().padStart(2, '0');
-                input.value = `${year}-${month}-${day}`;
             });
         });
     </script>
@@ -205,7 +198,7 @@
         <h1>Plans a fer</h1>
         <form id="todo-form">
             <input type="text" id="todo-input" placeholder="Enter a task" required>
-            <input type="date" id="todo-date" required>
+            <input type="date" id="todo-date">
             <button type="submit">Nou plan</button>
         </form>
         <ul id="todo-list"></ul>
