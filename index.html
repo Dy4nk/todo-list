@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plans a fer</title>
+    <style>
+        body {
+            background: #121212;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            color: #e2e2e2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        main {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            background: #1e1e1e;
+            border-radius: 10px;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        input[type="text"] {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: #6200ea;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background: #3700b3;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background: #333;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+        li.completed {
+            text-decoration: line-through;
+            opacity: .4;
+            transition: .5s all ease;
+        }
+        li button {
+            background: #e53935;
+            margin: 0 5px;
+            transition: background 0.3s ease;
+        }
+        li button:hover {
+            background: #b71c1c;
+        }
+        .complete-btn {
+            background: #43a047;
+        }
+        .complete-btn:hover {
+            background: #2e7d32;
+        }
+    </style>
+    <!-- Include Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDG2IX1ea9BPeVCJFcHhojNo4KGg7doETk",
+            authDomain: "test-4d081.firebaseapp.com",
+            projectId: "test-4d081",
+            storageBucket: "test-4d081.appspot.com",
+            messagingSenderId: "887829314483",
+            appId: "1:887829314483:web:389a665bf0f32ed5af69c6"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const todoForm = document.getElementById('todo-form');
+            const todoInput = document.getElementById('todo-input');
+            const todoList = document.getElementById('todo-list');
+
+            function renderTask(doc) {
+                const listItem = document.createElement('li');
+                listItem.textContent = doc.data().task;
+                listItem.setAttribute('data-id', doc.id);
+                if (doc.data().completed) {
+                    listItem.classList.add('completed');
+                }
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.addEventListener('click', () => {
+                    db.collection('todos').doc(doc.id).delete();
+                });
+
+                const completeButton = document.createElement('button');
+                completeButton.textContent = 'Complete';
+                completeButton.classList.add('complete-btn');
+                completeButton.addEventListener('click', () => {
+                    const completed = !doc.data().completed;
+                    db.collection('todos').doc(doc.id).update({
+                        completed: completed
+                    });
+                });
+
+                listItem.appendChild(completeButton);
+                listItem.appendChild(deleteButton);
+                todoList.appendChild(listItem);
+            }
+
+            db.collection('todos').onSnapshot(snapshot => {
+                const changes = snapshot.docChanges();
+                changes.forEach(change => {
+                    if (change.type === 'added') {
+                        renderTask(change.doc);
+                    } else if (change.type === 'removed') {
+                        const listItem = todoList.querySelector(`[data-id="${change.doc.id}"]`);
+                        todoList.removeChild(listItem);
+                    } else if (change.type === 'modified') {
+                        const listItem = todoList.querySelector(`[data-id="${change.doc.id}"]`);
+                        listItem.classList.toggle('completed', change.doc.data().completed);
+                    }
+                });
+            });
+
+            todoForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                db.collection('todos').add({
+                    task: todoInput.value,
+                    completed: false
+                });
+                todoInput.value = '';
+            });
+        });
+    </script>
+</head>
+<body>
+    <main>
+        <h1>Plans a fer</h1>
+        <form id="todo-form">
+            <input type="text" id="todo-input" placeholder="Enter a task" required>
+            <button type="submit">Nou plan</button>
+        </form>
+        <ul id="todo-list"></ul>
+    </main>
+</body>
+</html>
