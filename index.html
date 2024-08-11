@@ -113,13 +113,13 @@
                 }
 
                 const deleteButton = document.createElement('button');
-                deleteButton.textContent = 'Delete';
+                deleteButton.textContent = 'Borrar';
                 deleteButton.addEventListener('click', () => {
                     db.collection('todos').doc(doc.id).delete();
                 });
 
                 const completeButton = document.createElement('button');
-                completeButton.textContent = 'Complete';
+                completeButton.textContent = 'Fet';
                 completeButton.classList.add('complete-btn');
                 completeButton.addEventListener('click', () => {
                     const completed = !doc.data().completed;
