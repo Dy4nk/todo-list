@@ -32,7 +32,7 @@
             display: flex;
             flex-direction: column;
         }
-        input[type="text"] {
+        input[type="text"], input[type="date"] {
             padding: 10px;
             margin-bottom: 10px;
             border: none;
@@ -63,6 +63,7 @@
             justify-content: space-between;
             align-items: center;
             transition: background 0.3s ease;
+            position: relative;
         }
         li.completed {
             text-decoration: line-through;
@@ -73,6 +74,13 @@
             background: #e53935;
             margin: 0 5px;
             transition: background 0.3s ease;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        li button.complete-btn {
+            right: 75px;
         }
         li button:hover {
             background: #b71c1c;
@@ -83,8 +91,11 @@
         .complete-btn:hover {
             background: #2e7d32;
         }
+        .task-details {
+            flex-grow: 1;
+            padding-right: 90px;
+        }
     </style>
-    <!-- Include Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
     <script>
@@ -102,11 +113,29 @@
         document.addEventListener('DOMContentLoaded', function() {
             const todoForm = document.getElementById('todo-form');
             const todoInput = document.getElementById('todo-input');
+            const todoDate = document.getElementById('todo-date');
             const todoList = document.getElementById('todo-list');
+
+            function formatDate(date) {
+                const d = new Date(date);
+                let day = '' + d.getDate();
+                let month = '' + (d.getMonth() + 1);
+                const year = d.getFullYear().toString().slice(-2);
+
+                if (day.length < 2) 
+                    day = '0' + day;
+                if (month.length < 2) 
+                    month = '0' + month;
+
+                return [day, month, year].join('/');
+            }
 
             function renderTask(doc) {
                 const listItem = document.createElement('li');
-                listItem.textContent = doc.data().task;
+                const taskDetails = document.createElement('div');
+                taskDetails.classList.add('task-details');
+                taskDetails.textContent = `${doc.data().task} - ${formatDate(doc.data().date)}`;
+                listItem.appendChild(taskDetails);
                 listItem.setAttribute('data-id', doc.id);
                 if (doc.data().completed) {
                     listItem.classList.add('completed');
@@ -152,9 +181,21 @@
                 e.preventDefault();
                 db.collection('todos').add({
                     task: todoInput.value,
+                    date: todoDate.value,
                     completed: false
                 });
                 todoInput.value = '';
+                todoDate.value = '';
+            });
+
+            todoDate.addEventListener('change', (e) => {
+                const input = e.target;
+                const dateValue = new Date(input.value);
+                const formattedDate = formatDate(input.value);
+                const year = dateValue.getFullYear();
+                const month = (dateValue.getMonth() + 1).toString().padStart(2, '0');
+                const day = dateValue.getDate().toString().padStart(2, '0');
+                input.value = `${year}-${month}-${day}`;
             });
         });
     </script>
@@ -164,6 +205,7 @@
         <h1>Plans a fer</h1>
         <form id="todo-form">
             <input type="text" id="todo-input" placeholder="Enter a task" required>
+            <input type="date" id="todo-date" required>
             <button type="submit">Nou plan</button>
         </form>
         <ul id="todo-list"></ul>
