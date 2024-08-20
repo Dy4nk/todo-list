@@ -11,13 +11,23 @@
     <main>
         <h1>Plans a fer</h1>
         <form id="todo-form">
-            <input type="text" id="todo-input" placeholder="Enter a task" required>
+            <input type="text" id="todo-input" placeholder="Nom del plan" required>
             <input type="date" id="todo-date">
+            <input type="text" id="todo-info" placeholder="Hora i lloc de quedada">
+            <input type="url" id="todo-maps" placeholder="Link de Google Maps">
             <button type="submit"><i class="fas fa-plus"></i> Nou plan</button>
-        </form>
+        </form>        
         <ul id="todo-list"></ul>
     </main>
 
+    <div id="info-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-info-btn">&times;</span>
+            <h2>Task Info</h2>
+            <p id="info-details"></p>
+            <a id="info-link" href="#" target="_blank">Obrir Google Maps</a>
+        </div>
+    </div>
     <div id="edit-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn">&times;</span>
@@ -25,6 +35,8 @@
             <form id="edit-form">
                 <input type="text" id="edit-input" placeholder="Enter new task" required>
                 <input type="date" id="edit-date">
+                <input type="text" id="edit-info" placeholder="Hora i lloc de quedada">
+                <input type="url" id="edit-maps" placeholder="Link de Google Maps">
                 <button type="submit">Save changes</button>
             </form>
         </div>

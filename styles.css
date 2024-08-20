@@ -35,7 +35,7 @@ form {
     margin-bottom: 20px;
 }
 
-input[type="text"], input[type="date"] {
+input[type="text"], input[type="date"], input[type="url"] {
     padding: 10px 15px;
     border: none;
     border-radius: 5px;
@@ -44,7 +44,7 @@ input[type="text"], input[type="date"] {
     font-size: 16px;
 }
 
-input[type="text"]:focus, input[type="date"]:focus {
+input[type="text"]:focus, input[type="date"]:focus, input[type="url"]:focus {
     outline: none;
     box-shadow: 0 0 5px #6200ea;
 }
@@ -190,6 +190,33 @@ li button:hover {
 
 .close-btn:hover,
 .close-btn:focus {
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+li button.info-btn {
+    right: 95px;
+    color: #0288d1;
+}
+
+.fa-info {
+    color: #0288d1;
+}
+
+.fa-info:hover {
+    color: #03a9f4;
+}
+
+.close-info-btn {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-info-btn:hover,
+.close-info-btn:focus {
     color: #fff;
     text-decoration: none;
     cursor: pointer;

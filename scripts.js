@@ -14,12 +14,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const todoForm = document.getElementById('todo-form');
     const todoInput = document.getElementById('todo-input');
     const todoDate = document.getElementById('todo-date');
+    const todoInfo = document.getElementById('todo-info');
+    const todoMaps = document.getElementById('todo-maps');
     const todoList = document.getElementById('todo-list');
     const editModal = document.getElementById('edit-modal');
     const editForm = document.getElementById('edit-form');
     const editInput = document.getElementById('edit-input');
     const editDate = document.getElementById('edit-date');
     const closeModalBtn = document.querySelector('.close-btn');
+    const infoModal = document.getElementById('info-modal');
+    const infoDetails = document.getElementById('info-details');
+    const infoLink = document.getElementById('info-link');
+    const closeInfoModalBtn = document.querySelector('.close-info-btn');
     let currentDocId = null;
 
     function formatDate(date) {
@@ -71,11 +77,25 @@ document.addEventListener('DOMContentLoaded', function() {
             editModal.style.display = 'block';
             editInput.value = doc.data().task;
             editDate.value = doc.data().date || '';
+            document.getElementById('edit-info').value = doc.data().info || ''; 
+            document.getElementById('edit-maps').value = doc.data().mapsLink || '';
             currentDocId = doc.id;
+        });
+
+        const infoButton = document.createElement('button');
+        infoButton.innerHTML = '<i class="fas fa-info"></i>';
+        infoButton.classList.add('info-btn');
+        infoButton.addEventListener('click', () => {
+            const taskInfo = doc.data().info || 'No additional info provided.';
+            const mapsLink = doc.data().mapsLink || '#';
+            infoDetails.textContent = taskInfo;
+            infoLink.href = mapsLink;
+            infoModal.style.display = 'block';
         });
 
         listItem.appendChild(completeButton);
         listItem.appendChild(editButton);
+        listItem.appendChild(infoButton);
         listItem.appendChild(deleteButton);
         todoList.appendChild(listItem);
     }
@@ -100,33 +120,52 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         const taskValue = todoInput.value;
         const dateValue = todoDate.value || null;
+        const infoValue = todoInfo.value || 'No hi ha informacio disponible.';
+        const mapsLinkValue = todoMaps.value || '#';
+        
         db.collection('todos').add({
             task: taskValue,
             date: dateValue,
-            completed: false
+            completed: false,
+            info: infoValue,
+            mapsLink: mapsLinkValue
         });
         todoInput.value = '';
         todoDate.value = '';
+        todoInfo.value = '';
+        todoMaps.value = '';
     });
 
     editForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const newTask = editInput.value;
         const newDate = editDate.value || null;
+        const newInfo = document.getElementById('edit-info').value || ''; // Get new value for info
+        const newMapsLink = document.getElementById('edit-maps').value || ''; // Get new value for mapsLink
+    
         db.collection('todos').doc(currentDocId).update({
             task: newTask,
-            date: newDate
+            date: newDate,
+            info: newInfo,
+            mapsLink: newMapsLink 
         });
+    
         editModal.style.display = 'none';
-    });
+    });    
 
     closeModalBtn.addEventListener('click', () => {
         editModal.style.display = 'none';
     });
 
+    closeInfoModalBtn.addEventListener('click', () => {
+        infoModal.style.display = 'none';
+    });
+
     window.addEventListener('click', (e) => {
         if (e.target == editModal) {
             editModal.style.display = 'none';
+        } else if (e.target == infoModal) {
+            infoModal.style.display = 'none';
         }
     });
 });
