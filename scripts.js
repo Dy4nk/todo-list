@@ -35,12 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let month = '' + (d.getMonth() + 1);
         const year = d.getFullYear().toString().slice(-2);
 
-        if (day.length < 2) 
-            day = '0' + day;
-        if (month.length < 2) 
-            month = '0' + month;
-
-        return [day, month, year].join('/');
+        return [day.padStart(2, '0'), month.padStart(2, '0'), year].join('/');
     }
 
     function renderTask(doc) {
@@ -53,11 +48,21 @@ document.addEventListener('DOMContentLoaded', function() {
         if (doc.data().completed) {
             listItem.classList.add('completed');
         }
+        if (doc.data().archived) {
+            listItem.classList.add('archived'); // Add a class for styling if archived
+        }
 
-        const deleteButton = document.createElement('button');
-        deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
-        deleteButton.addEventListener('click', () => {
-            db.collection('todos').doc(doc.id).delete();
+        const archiveButton = document.createElement('button');
+        archiveButton.innerHTML = '<i class="fas fa-archive"></i>'; // Change icon to indicate archiving
+        archiveButton.classList.add('archive-btn');
+        archiveButton.addEventListener('click', () => {
+            db.collection('todos').doc(doc.id).update({
+                archived: true // Update the archived status
+            }).then(() => {
+                console.log('Task archived');
+            }).catch((error) => {
+                console.error('Error archiving task: ', error);
+            });
         });
 
         const completeButton = document.createElement('button');
@@ -94,24 +99,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         listItem.appendChild(completeButton);
+        listItem.appendChild(archiveButton); // Add archive button
         listItem.appendChild(editButton);
         listItem.appendChild(infoButton);
-        listItem.appendChild(deleteButton);
         todoList.appendChild(listItem);
     }
 
     db.collection('todos').onSnapshot(snapshot => {
         const changes = snapshot.docChanges();
         changes.forEach(change => {
-            if (change.type === 'added') {
+            if (change.type === 'added' && !change.doc.data().archived) {
                 renderTask(change.doc);
             } else if (change.type === 'removed') {
                 const listItem = todoList.querySelector(`[data-id="${change.doc.id}"]`);
                 todoList.removeChild(listItem);
             } else if (change.type === 'modified') {
                 const listItem = todoList.querySelector(`[data-id="${change.doc.id}"]`);
-                listItem.querySelector('.task-details').textContent = `${change.doc.data().task} - ${formatDate(change.doc.data().date)}`;
-                listItem.classList.toggle('completed', change.doc.data().completed);
+                if (!change.doc.data().archived) {
+                    listItem.querySelector('.task-details').textContent = `${change.doc.data().task} - ${formatDate(change.doc.data().date)}`;
+                    listItem.classList.toggle('completed', change.doc.data().completed);
+                } else {
+                    // If the task is archived, remove it from the display
+                    todoList.removeChild(listItem);
+                }
             }
         });
     });
@@ -128,7 +138,8 @@ document.addEventListener('DOMContentLoaded', function() {
             date: dateValue,
             completed: false,
             info: infoValue,
-            mapsLink: mapsLinkValue
+            mapsLink: mapsLinkValue,
+            archived: false // Set archived to false when creating a new task
         });
         todoInput.value = '';
         todoDate.value = '';
@@ -169,3 +180,4 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
